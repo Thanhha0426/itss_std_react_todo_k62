@@ -12,6 +12,9 @@ import firebase from 'firebase';
   firebase.initializeApp(firebaseConfig); 
   
   const db = firebase.firestore();
+  
+  export const auth = firebase.auth();
+  export default firebase;
 
 export const getFirebaseItems = async () => {
   try {
@@ -53,3 +56,27 @@ export const clearFirebaseItem = async (item) => {
     console.log(err);
   });
 };
+export const uiConfig = {
+  signInFlow: 'popup',
+  signInSuccessUrl: "/",
+  signInOptions: [
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+  ],
+}
+
+export const storeUserInfo = async (user) => {
+  const { uid } = user;
+  const userDoc = await db.collection("users").doc(uid).get();
+  if (!userDoc.exists) {
+    await db.collection("users").doc(uid).set({ name: user.displayName });
+    return {
+      name: user.displayName,
+      id: uid,
+    };
+  } else {
+    return {
+      id: uid,
+      ...userDoc.data(),
+    };
+  }
+}
